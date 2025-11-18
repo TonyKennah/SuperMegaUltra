@@ -105,7 +105,7 @@ export default function Index() {
           <Text style={styles.sectionTitle}>Expected Counts (for {totalEntries} entries)</Text>
           <View style={styles.countsContent}>
             {expectedNumbers.map((num) => {
-              const expectedCount = (totalEntries * expectedPercentages[num]).toFixed(1);
+              const expectedCount = Math.round(totalEntries * expectedPercentages[num]);
               return (
                 <View key={num} style={[styles.countItem, styles.expectedItem]}>
                   <Text style={styles.emojiLabel}>{numberKey[num]}</Text>
@@ -128,7 +128,7 @@ export default function Index() {
                 <View key={num} style={[styles.countItem, styles.differenceItem]}>
                   <Text style={styles.emojiLabel}>{numberKey[num]}</Text>
                   <Text style={[styles.countValue, { color: diffColor, fontWeight: 'bold' }]}>
-                    {diff > 0 ? '+' : ''}{diff.toFixed(1)}
+                    {diff > 0 ? '+' : ''}{Math.round(diff)}
                   </Text>
                 </View>
               );
@@ -154,14 +154,13 @@ export default function Index() {
             {Object.entries(numberKey).map(([num, desc]) => (
               <Pressable key={num} onPress={() => addNumberToHistory(num)}>
                 <View style={[styles.countItem, styles.legendItem, {minWidth: 70}]}>
-                  <Text style={styles.countNumber}>{num}:</Text>
                   <Text style={styles.legendDesc}>{desc}</Text>
                 </View>
               </Pressable>
             ))}
           </View>
         </View>
-        <Text style={styles.historyTitle}>History</Text>
+        <Text style={styles.historyTitle}>History ({totalEntries})</Text>
         <FlatList
           data={chunkedHistory}
           renderItem={renderHistoryRow}
@@ -212,7 +211,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e2e8f0', // A light gray-blue
   },
   legendDesc: {
-    fontSize: 24,
+    fontSize: 64,
   },
   emojiLabel: {
     fontSize: 20,
