@@ -98,7 +98,7 @@ export default function Index() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Statistics</Text>
+          <Text style={styles.sectionTitle}>Super Mega Ultra Tracker</Text>
           <View style={styles.countsContent}>
             {displayOrder.map(num => {
               const actual = counts[num] || 0;
@@ -108,8 +108,8 @@ export default function Index() {
 
               return (
                 <View key={num} style={styles.statItemContainer}>
-                  <Text style={styles.statTopLeft}>{Math.round(expected)}</Text>
-                  <Text style={styles.statTopRight}>{actual}</Text>
+                  <Text style={styles.statTopLeft}>{actual}</Text>
+                  <Text style={styles.statTopRight}>{Math.round(expected)}</Text>
                   <Text style={styles.statEmoji}>{numberKey[num]}</Text>
                   <Text style={[styles.statDifference, { color: diffColor }]}>
                     {diff > 0 ? '+' : ''}{Math.round(diff)}
@@ -120,7 +120,7 @@ export default function Index() {
           </View>
         </View>
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Legend / Quick Add</Text>
+          <Text style={styles.sectionTitle}>Add</Text>
           <View style={styles.countsContent}>
             {displayOrder.map((num) => {
               return (
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     left: 6,
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#0056b3',
   },
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
   },
   statDifference: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   legendItem: {
