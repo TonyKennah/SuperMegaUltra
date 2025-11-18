@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   },
   legendItem: {
     backgroundColor: '#e2e8f0', // A light gray-blue
-    padding: 10,
+    padding: 2,
     margin: 4,
     borderRadius: 12,
   },
