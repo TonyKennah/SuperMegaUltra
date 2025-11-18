@@ -186,14 +186,13 @@ export default function Index() {
             })}
           </View>
         </View>
-        <View style={[styles.sectionContainer, { borderBottomColor: currentColors.sectionBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-            <Text style={[styles.sectionTitle, { color: currentColors.text, marginBottom: 0 }]}>Settings</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <Text style={[styles.historyTitle, { color: currentColors.text, marginBottom: 0 }]}>History ({displayHistory.length})</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text style={{ color: currentColors.text }}>Dark Mode</Text>
                 <Switch value={theme === 'dark'} onValueChange={(isOn) => setTheme(isOn ? 'dark' : 'light')} />
             </View>
         </View>
-        <Text style={[styles.historyTitle, { color: currentColors.text }]}>History ({displayHistory.length})</Text>
         <FlatList
           data={chunkedHistory}
           renderItem={renderHistoryRow}
