@@ -5,6 +5,7 @@ import {
   Pressable,
   SafeAreaView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -15,6 +16,7 @@ export default function Index() {
   const [history, setHistory] = useState<string[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [sinceLastHit, setSinceLastHit] = useState<Record<string, number>>({});
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const inputRef = useRef<TextInput>(null);
 
   const addNumberToHistory = (numToAdd: string) => {
@@ -115,11 +117,39 @@ export default function Index() {
     8: "🍉",
     9: "💰",
   };
+
+  const colors = {
+    light: {
+      background: '#f0f0f0',
+      text: '#333',
+      sectionBorder: '#ccc',
+      statItemBg: '#f0f0f0',
+      legendItemBg: '#e2e8f0',
+      historyRowBorder: '#ddd',
+      statTopLeft: '#0056b3',
+      statTopRight: '#6c757d',
+      statSince: '#888',
+    },
+    dark: {
+      background: '#121212',
+      text: '#e0e0e0',
+      sectionBorder: '#444',
+      statItemBg: '#1e1e1e',
+      legendItemBg: '#2c2c2c',
+      historyRowBorder: '#444',
+      statTopLeft: '#4dabf7',
+      statTopRight: '#adb5bd',
+      statSince: '#999',
+    }
+  };
+
+  const currentColors = colors[theme];
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
       <View style={styles.content}>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Super Mega Ultra Tracker</Text>
+        <View style={[styles.sectionContainer, { borderBottomColor: currentColors.sectionBorder }]}>
+          <Text style={[styles.sectionTitle, { color: currentColors.text }]}>Super Mega Ultra Tracker</Text>
           <View style={styles.countsContent}>
             {displayOrder.map(num => {
               const actual = counts[num] || 0;
@@ -129,12 +159,12 @@ export default function Index() {
               const since = sinceLastHit[num] ?? 'N/A';
 
               return (
-                <View key={num} style={styles.statItemContainer}>
-                  <Text style={styles.statTopLeft}>{actual}</Text>
-                  <Text style={styles.statTopRight}>{Math.round(expected)}</Text>
+                <View key={num} style={[styles.statItemContainer, { backgroundColor: currentColors.statItemBg }]}>
+                  <Text style={[styles.statTopLeft, { color: currentColors.statTopLeft }]}>{actual}</Text>
+                  <Text style={[styles.statTopRight, { color: currentColors.statTopRight }]}>{Math.round(expected)}</Text>
                   <Text style={[styles.statBottomLeft, { color: diffColor }]}>{diff > 0 ? '+' : ''}{Math.round(diff)}</Text>
                   <Text style={styles.statEmoji}>{numberKey[num]}</Text>
-                  <Text style={styles.statDifference}>
+                  <Text style={[styles.statDifference, { color: currentColors.statSince }]}>
                     {since}
                   </Text>
                 </View>
@@ -142,13 +172,13 @@ export default function Index() {
             })}
           </View>
         </View>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Add</Text>
+        <View style={[styles.sectionContainer, { borderBottomColor: currentColors.sectionBorder }]}>
+          <Text style={[styles.sectionTitle, { color: currentColors.text }]}>Add</Text>
           <View style={styles.countsContent}>
             {displayOrder.map((num) => {
               return (
                 <Pressable key={num} onPress={() => addNumberToHistory(String(num))}>
-                  <View style={[styles.legendItem, {minWidth: 70}]}>
+                  <View style={[styles.legendItem, {minWidth: 70, backgroundColor: currentColors.legendItemBg}]}>
                     <Text style={styles.legendDesc}>{numberKey[num]}</Text>
                   </View>
                 </Pressable>
@@ -156,7 +186,14 @@ export default function Index() {
             })}
           </View>
         </View>
-        <Text style={styles.historyTitle}>History ({displayHistory.length})</Text>
+        <View style={[styles.sectionContainer, { borderBottomColor: currentColors.sectionBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+            <Text style={[styles.sectionTitle, { color: currentColors.text, marginBottom: 0 }]}>Settings</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={{ color: currentColors.text }}>Dark Mode</Text>
+                <Switch value={theme === 'dark'} onValueChange={(isOn) => setTheme(isOn ? 'dark' : 'light')} />
+            </View>
+        </View>
+        <Text style={[styles.historyTitle, { color: currentColors.text }]}>History ({displayHistory.length})</Text>
         <FlatList
           data={chunkedHistory}
           renderItem={renderHistoryRow}
@@ -169,14 +206,13 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f0f0f0" },
+  container: { flex: 1 },
   content: { flex: 1, padding: 20 },
   title: { fontSize: 24, fontWeight: "bold", marginVertical: 20, textAlign: "center" },
   sectionContainer: {
     marginBottom: 15,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
   },
   sectionTitle: {
     textAlign: 'center',
@@ -196,7 +232,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     margin: 8,
-    backgroundColor: '#f0f0f0',
     borderRadius: 10,
   },
   statTopLeft: {
@@ -205,7 +240,6 @@ const styles = StyleSheet.create({
     left: 6,
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#0056b3',
   },
   statBottomLeft: {
     position: 'absolute',
@@ -217,7 +251,6 @@ const styles = StyleSheet.create({
   statTopRight: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#6c757d',
     position: 'absolute',
     top: 4,
     right: 6,
@@ -231,10 +264,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 2,
     right: 8,
-    color: '#888',
   },
   legendItem: {
-    backgroundColor: '#e2e8f0', // A light gray-blue
     padding: 2,
     margin: 4,
     borderRadius: 12,
@@ -255,7 +286,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
   },
   historyBankItem: {
     width: '3.28%', // 100% / 7 items
