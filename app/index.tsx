@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
   },
   historyBankItem: {
-    width: '14.28%', // 100% / 7 items
+    width: '3.28%', // 100% / 7 items
   },
   historyBankText: {
     fontSize: 24,
