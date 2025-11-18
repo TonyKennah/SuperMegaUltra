@@ -77,7 +77,9 @@ export default function Index() {
     return chunkedArr;
   };
 
-  const chunkedHistory = chunkArray(history, 7);
+  // Filter out '0' for display purposes only, keeping it in the main history state for calculations
+  const displayHistory = history.filter(h => h !== '0');
+  const chunkedHistory = chunkArray(displayHistory, 7);
 
   const renderHistoryRow: ListRenderItem<string[]> = ({ item, index: rowIndex }) => (
     <View style={styles.historyRow}>
@@ -154,7 +156,7 @@ export default function Index() {
             })}
           </View>
         </View>
-        <Text style={styles.historyTitle}>History ({totalEntries})</Text>
+        <Text style={styles.historyTitle}>History ({displayHistory.length})</Text>
         <FlatList
           data={chunkedHistory}
           renderItem={renderHistoryRow}
