@@ -207,6 +207,7 @@ const styles = StyleSheet.create({
   },
   legendDesc: {
     fontSize: 64,
+    userSelect: 'none', // Prevents the emoji text from being selected
   },
   emojiLabel: {
     fontSize: 20,
