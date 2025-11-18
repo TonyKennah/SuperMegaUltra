@@ -98,47 +98,20 @@ export default function Index() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Actual Counts</Text>
+          <Text style={styles.sectionTitle}>Statistics</Text>
           <View style={styles.countsContent}>
-            {displayOrder.map((num) => {
-              const count = counts[num];
-              if (count === undefined) return null; // Don't render if count doesn't exist
-              return (
-                <View key={num} style={[styles.countItem, {minWidth: 70}]}>
-                  <Text style={styles.emojiLabel}>{numberKey[num]}</Text>
-                  <Text style={styles.countValue}>{count}</Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Expected Counts (for {totalEntries} entries)</Text>
-          <View style={styles.countsContent}>
-            {displayOrder.map((num) => {
-              const expectedCount = Math.round(totalEntries * expectedPercentages[num]);
-              return (
-                <View key={num} style={[styles.countItem, styles.expectedItem]}>
-                  <Text style={styles.emojiLabel}>{numberKey[num]}</Text>
-                  <Text style={styles.countValue}>{expectedCount}</Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Difference (Actual - Expected)</Text>
-          <View style={styles.countsContent}>
-            {displayOrder.map((num) => {
+            {displayOrder.map(num => {
               const actual = counts[num] || 0;
               const expected = totalEntries * expectedPercentages[num];
               const diff = actual - expected;
               const diffColor = diff > 0 ? '#28a745' : diff < 0 ? '#dc3545' : '#333';
 
               return (
-                <View key={num} style={[styles.countItem, styles.differenceItem]}>
-                  <Text style={styles.emojiLabel}>{numberKey[num]}</Text>
-                  <Text style={[styles.countValue, { color: diffColor, fontWeight: 'bold' }]}>
+                <View key={num} style={styles.statItemContainer}>
+                  <Text style={styles.statTopLeft}>{Math.round(expected)}</Text>
+                  <Text style={styles.statTopRight}>{actual}</Text>
+                  <Text style={styles.statEmoji}>{numberKey[num]}</Text>
+                  <Text style={[styles.statDifference, { color: diffColor }]}>
                     {diff > 0 ? '+' : ''}{Math.round(diff)}
                   </Text>
                 </View>
@@ -147,12 +120,12 @@ export default function Index() {
           </View>
         </View>
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Next Hit</Text>
+          <Text style={styles.sectionTitle}>Legend / Quick Add</Text>
           <View style={styles.countsContent}>
             {displayOrder.map((num) => {
               return (
                 <Pressable key={num} onPress={() => addNumberToHistory(String(num))}>
-                  <View style={[styles.countItem, styles.legendItem, {minWidth: 70}]}>
+                  <View style={[styles.legendItem, {minWidth: 70}]}>
                     <Text style={styles.legendDesc}>{numberKey[num]}</Text>
                   </View>
                 </Pressable>
@@ -193,22 +166,44 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
   },
-  countItem: {
-    flexDirection: "row",
-    backgroundColor: "#e9e9e9",
-    borderRadius: 12,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    margin: 4,
-  },
-  expectedItem: {
-    backgroundColor: '#dbeafe', // A light blue to differentiate
-  },
-  differenceItem: {
+  statItemContainer: {
+    position: 'relative',
+    width: 80,
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 8,
     backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+  },
+  statTopLeft: {
+    position: 'absolute',
+    top: 4,
+    left: 6,
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#0056b3',
+  },
+  statTopRight: {
+    position: 'absolute',
+    top: 4,
+    right: 6,
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#28a745',
+  },
+  statEmoji: {
+    fontSize: 32,
+  },
+  statDifference: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   legendItem: {
     backgroundColor: '#e2e8f0', // A light gray-blue
+    padding: 10,
+    margin: 4,
+    borderRadius: 12,
   },
   legendDesc: {
     fontSize: 64,
@@ -219,7 +214,6 @@ const styles = StyleSheet.create({
   },
   countNumber: { fontWeight: "bold", marginRight: 5 },
   countValue: { color: "#333" },
-  input: { height: 40, borderColor: "gray", borderWidth: 1, marginBottom: 20, paddingHorizontal: 10, backgroundColor: 'white', borderRadius: 5 },
   historyTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   list: { flex: 1 },
   historyRow: {
