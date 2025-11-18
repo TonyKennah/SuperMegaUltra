@@ -71,8 +71,20 @@ export default function Index() {
   );
 
   const totalEntries = history.length;
-  const expectedCount = (totalEntries / 10).toFixed(1);
   const expectedNumbers = Array.from({ length: 10 }, (_, i) => i);
+
+  const expectedPercentages: Record<number, number> = {
+    0: 0.0926,
+    1: 0.037,
+    2: 0.3704, // Cherry
+    3: 0.10,
+    4: 0.1667, // Grape
+    5: 0.1481, // Lemon
+    6: 0.10,
+    7: 0.037,
+    8: 0.0926,
+    9: 0.037,
+  };
 
   const numberKey: Record<number, string> = {
     0: "⬆️",
@@ -92,12 +104,15 @@ export default function Index() {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Expected Counts (for {totalEntries} entries)</Text>
           <View style={styles.countsContent}>
-            {expectedNumbers.map((num) => (
-              <View key={num} style={[styles.countItem, styles.expectedItem]}>
-                <Text style={styles.countNumber}>{num}:</Text>
-                <Text style={styles.countValue}>{expectedCount}</Text>
-              </View>
-            ))}
+            {expectedNumbers.map((num) => {
+              const expectedCount = (totalEntries * expectedPercentages[num]).toFixed(1);
+              return (
+                <View key={num} style={[styles.countItem, styles.expectedItem]}>
+                  <Text style={styles.emojiLabel}>{numberKey[num]}</Text>
+                  <Text style={styles.countValue}>{expectedCount}</Text>
+                </View>
+              );
+            })}
           </View>
         </View>
         <View style={styles.sectionContainer}>
@@ -105,7 +120,7 @@ export default function Index() {
           <View style={styles.countsContent}>
             {expectedNumbers.map((num) => {
               const actual = counts[num] || 0;
-              const expected = totalEntries / 10;
+              const expected = totalEntries * expectedPercentages[num];
               const diff = actual - expected;
               const diffColor = diff > 0 ? '#28a745' : diff < 0 ? '#dc3545' : '#333';
 
@@ -150,7 +165,7 @@ export default function Index() {
         <FlatList
           data={chunkedHistory}
           renderItem={renderHistoryRow}
-          keyExtractor={(_, index) => index.toString()}
+          keyExtractor={(_item, index) => index.toString()}
           style={styles.list}
         />
       </View>
@@ -197,7 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e2e8f0', // A light gray-blue
   },
   legendDesc: {
-    fontSize: 64,
+    fontSize: 24,
   },
   emojiLabel: {
     fontSize: 20,
@@ -218,7 +233,7 @@ const styles = StyleSheet.create({
     width: '16.66%', // 100% / 6 items
   },
   historyBankText: {
-    fontSize: 48,
+    fontSize: 24,
     textAlign: 'center',
   },
 });
