@@ -18,7 +18,7 @@ export default function Index() {
 
   const addNumberToHistory = (numToAdd: string) => {
     const newNumber = numToAdd.trim();
-    if (newNumber) {
+    if (newNumber && numberKey.hasOwnProperty(newNumber)) {
       setHistory([newNumber, ...history]); // Add new number to the top of the list
       setCounts((prevCounts) => ({
         ...prevCounts,
@@ -71,16 +71,14 @@ export default function Index() {
   );
 
   const totalEntries = history.length;
-  const expectedNumbers = Array.from({ length: 10 }, (_, i) => i);
+  const displayOrder = [2, 4, 5, 8, 9, 0, 7, 1];
 
   const expectedPercentages: Record<number, number> = {
     0: 0.0926,
     1: 0.037,
     2: 0.3704, // Cherry
-    3: 0.10,
     4: 0.1667, // Grape
     5: 0.1481, // Lemon
-    6: 0.10,
     7: 0.037,
     8: 0.0926,
     9: 0.037,
@@ -90,10 +88,8 @@ export default function Index() {
     0: "⬆️",
     1: "🎰",
     2: "🍒",
-    3: "3",
     4: "🍇",
     5: "🍋",
-    6: "6",
     7: "7️⃣",
     8: "🍉",
     9: "💰",
@@ -102,9 +98,24 @@ export default function Index() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Actual Counts</Text>
+          <View style={styles.countsContent}>
+            {displayOrder.map((num) => {
+              const count = counts[num];
+              if (count === undefined) return null; // Don't render if count doesn't exist
+              return (
+                <View key={num} style={[styles.countItem, {minWidth: 70}]}>
+                  <Text style={styles.emojiLabel}>{numberKey[num]}</Text>
+                  <Text style={styles.countValue}>{count}</Text>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+        <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Expected Counts (for {totalEntries} entries)</Text>
           <View style={styles.countsContent}>
-            {expectedNumbers.map((num) => {
+            {displayOrder.map((num) => {
               const expectedCount = Math.round(totalEntries * expectedPercentages[num]);
               return (
                 <View key={num} style={[styles.countItem, styles.expectedItem]}>
@@ -118,7 +129,7 @@ export default function Index() {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Difference (Actual - Expected)</Text>
           <View style={styles.countsContent}>
-            {expectedNumbers.map((num) => {
+            {displayOrder.map((num) => {
               const actual = counts[num] || 0;
               const expected = totalEntries * expectedPercentages[num];
               const diff = actual - expected;
@@ -136,28 +147,17 @@ export default function Index() {
           </View>
         </View>
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Actual Counts</Text>
+          <Text style={styles.sectionTitle}>Next Hit</Text>
           <View style={styles.countsContent}>
-            {Object.entries(counts)
-              .sort(([a], [b]) => Number(a) - Number(b)) // Sort counts numerically
-              .map(([num, count]) => (
-                <View key={num} style={[styles.countItem, {minWidth: 70}]}>
-                  <Text style={styles.emojiLabel}>{numberKey[Number(num)]}</Text>
-                  <Text style={styles.countValue}>{count}</Text>
-                </View>
-            ))}
-          </View>
-        </View>
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Legend</Text>
-          <View style={styles.countsContent}>
-            {Object.entries(numberKey).map(([num, desc]) => (
-              <Pressable key={num} onPress={() => addNumberToHistory(num)}>
-                <View style={[styles.countItem, styles.legendItem, {minWidth: 70}]}>
-                  <Text style={styles.legendDesc}>{desc}</Text>
-                </View>
-              </Pressable>
-            ))}
+            {displayOrder.map((num) => {
+              return (
+                <Pressable key={num} onPress={() => addNumberToHistory(String(num))}>
+                  <View style={[styles.countItem, styles.legendItem, {minWidth: 70}]}>
+                    <Text style={styles.legendDesc}>{numberKey[num]}</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
         <Text style={styles.historyTitle}>History ({totalEntries})</Text>
