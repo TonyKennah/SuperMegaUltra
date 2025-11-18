@@ -49,7 +49,7 @@ export default function Index() {
       return newCounts;
     });
   };
-  // Helper to group history into banks of 6
+  // Helper to group history into banks of 7
   const chunkArray = (arr: string[], size: number): string[][] => {
     const chunkedArr: string[][] = [];
     for (let i = 0; i < arr.length; i += size) {
@@ -58,12 +58,12 @@ export default function Index() {
     return chunkedArr;
   };
 
-  const chunkedHistory = chunkArray(history, 6);
+  const chunkedHistory = chunkArray(history, 7);
 
   const renderHistoryRow: ListRenderItem<string[]> = ({ item, index: rowIndex }) => (
     <View style={styles.historyRow}>
       {item.map((num, index) => (
-        <Pressable key={index} style={styles.historyBankItem} onPress={() => handleRemoveNumber(rowIndex * 6 + index)}>
+        <Pressable key={index} style={styles.historyBankItem} onPress={() => handleRemoveNumber(rowIndex * 7 + index)}>
           <Text style={styles.historyBankText}>{numberKey[Number(num)]}</Text>
         </Pressable>
       ))}
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
   },
   historyBankItem: {
-    width: '16.66%', // 100% / 6 items
+    width: '14.28%', // 100% / 7 items
   },
   historyBankText: {
     fontSize: 24,
