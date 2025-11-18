@@ -14,16 +14,27 @@ export default function Index() {
   const [number, setNumber] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [sinceLastHit, setSinceLastHit] = useState<Record<string, number>>({});
   const inputRef = useRef<TextInput>(null);
 
   const addNumberToHistory = (numToAdd: string) => {
     const newNumber = numToAdd.trim();
     if (newNumber && numberKey.hasOwnProperty(newNumber)) {
-      setHistory([newNumber, ...history]); // Add new number to the top of the list
+      const newHistory = [newNumber, ...history];
+      setHistory(newHistory);
       setCounts((prevCounts) => ({
         ...prevCounts,
         [newNumber]: (prevCounts[newNumber] || 0) + 1,
       }));
+
+      // Recalculate sinceLastHit from the new history
+      const newSinceLastHit: Record<string, number> = {};
+      displayOrder.forEach(num => {
+        const lastIndex = newHistory.findIndex(h => h === String(num));
+        // If found, the count is its index. If not, it's the total length.
+        newSinceLastHit[num] = lastIndex === -1 ? newHistory.length : lastIndex;
+      });
+      setSinceLastHit(newSinceLastHit);
     }
   };
 
@@ -40,7 +51,7 @@ export default function Index() {
     setHistory(newHistory);
 
     // Decrement count
-    setCounts((prevCounts) => {
+    setCounts(prevCounts => {
       const newCounts = { ...prevCounts };
       newCounts[numberToRemove]--;
       if (newCounts[numberToRemove] === 0) {
@@ -48,6 +59,14 @@ export default function Index() {
       }
       return newCounts;
     });
+
+    // Recalculate sinceLastHit after removal
+    const newSinceLastHit: Record<string, number> = {};
+    displayOrder.forEach(num => {
+      const lastIndex = newHistory.findIndex(h => h === String(num));
+      newSinceLastHit[num] = lastIndex === -1 ? newHistory.length : lastIndex;
+    });
+    setSinceLastHit(newSinceLastHit);
   };
   // Helper to group history into banks of 7
   const chunkArray = (arr: string[], size: number): string[][] => {
@@ -104,15 +123,17 @@ export default function Index() {
               const actual = counts[num] || 0;
               const expected = totalEntries * expectedPercentages[num];
               const diff = actual - expected;
-              const diffColor = diff > 0 ? '#28a745' : diff < 0 ? '#dc3545' : '#333';
+              const diffColor = diff > 0 ? '#28a745' : diff < 0 ? '#dc3545' : '#666';
+              const since = sinceLastHit[num] ?? 'N/A';
 
               return (
                 <View key={num} style={styles.statItemContainer}>
                   <Text style={styles.statTopLeft}>{actual}</Text>
                   <Text style={styles.statTopRight}>{Math.round(expected)}</Text>
+                  <Text style={[styles.statBottomLeft, { color: diffColor }]}>{diff > 0 ? '+' : ''}{Math.round(diff)}</Text>
                   <Text style={styles.statEmoji}>{numberKey[num]}</Text>
-                  <Text style={[styles.statDifference, { color: diffColor }]}>
-                    {diff > 0 ? '+' : ''}{Math.round(diff)}
+                  <Text style={styles.statDifference}>
+                    {since}
                   </Text>
                 </View>
               );
@@ -184,20 +205,31 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#0056b3',
   },
+  statBottomLeft: {
+    position: 'absolute',
+    bottom: 1,
+    left: 6,
+    fontSize: 20,
+    color: '#888',
+  },
   statTopRight: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#6c757d',
     position: 'absolute',
     top: 4,
     right: 6,
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#28a745',
   },
   statEmoji: {
     fontSize: 32,
   },
   statDifference: {
-    fontSize: 20,
+    fontSize: 14,
     fontWeight: 'bold',
+    position: 'absolute',
+    bottom: 2,
+    right: 8,
+    color: '#888',
   },
   legendItem: {
     backgroundColor: '#e2e8f0', // A light gray-blue
