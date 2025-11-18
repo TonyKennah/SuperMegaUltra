@@ -16,17 +16,20 @@ export default function Index() {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const inputRef = useRef<TextInput>(null);
 
-  const handleNumberSubmit = () => {
-    const newNumber = number.trim();
+  const addNumberToHistory = (numToAdd: string) => {
+    const newNumber = numToAdd.trim();
     if (newNumber) {
       setHistory([newNumber, ...history]); // Add new number to the top of the list
       setCounts((prevCounts) => ({
         ...prevCounts,
         [newNumber]: (prevCounts[newNumber] || 0) + 1,
       }));
-      setNumber(""); // Clear the input field
-      // We don't need to call focus() here, as `blurOnSubmit={false}` handles it.
     }
+  };
+
+  const handleNumberSubmit = () => {
+    addNumberToHistory(number);
+    setNumber(""); // Clear the input field
   };
 
   const handleRemoveNumber = (indexToRemove: number) => {
@@ -46,7 +49,7 @@ export default function Index() {
       return newCounts;
     });
   };
-  // Helper to group history into banks of 8
+  // Helper to group history into banks of 6
   const chunkArray = (arr: string[], size: number): string[][] => {
     const chunkedArr: string[][] = [];
     for (let i = 0; i < arr.length; i += size) {
@@ -55,13 +58,13 @@ export default function Index() {
     return chunkedArr;
   };
 
-  const chunkedHistory = chunkArray(history, 8);
+  const chunkedHistory = chunkArray(history, 6);
 
   const renderHistoryRow: ListRenderItem<string[]> = ({ item, index: rowIndex }) => (
     <View style={styles.historyRow}>
       {item.map((num, index) => (
-        <Pressable key={index} style={styles.historyBankItem} onPress={() => handleRemoveNumber(rowIndex * 8 + index)}>
-          <Text style={styles.historyBankText}>{num}</Text>
+        <Pressable key={index} style={styles.historyBankItem} onPress={() => handleRemoveNumber(rowIndex * 6 + index)}>
+          <Text style={styles.historyBankText}>{numberKey[Number(num)]}</Text>
         </Pressable>
       ))}
     </View>
@@ -75,10 +78,10 @@ export default function Index() {
     0: "⬆️",
     1: "🎰",
     2: "🍒",
-    3: "desc",
+    3: "3",
     4: "🍇",
     5: "🍋",
-    6: "desc",
+    6: "6",
     7: "7️⃣",
     8: "🍉",
     9: "💰",
@@ -108,7 +111,7 @@ export default function Index() {
 
               return (
                 <View key={num} style={[styles.countItem, styles.differenceItem]}>
-                  <Text style={styles.countNumber}>{num}:</Text>
+                  <Text style={styles.emojiLabel}>{numberKey[num]}</Text>
                   <Text style={[styles.countValue, { color: diffColor, fontWeight: 'bold' }]}>
                     {diff > 0 ? '+' : ''}{diff.toFixed(1)}
                   </Text>
@@ -123,8 +126,8 @@ export default function Index() {
             {Object.entries(counts)
               .sort(([a], [b]) => Number(a) - Number(b)) // Sort counts numerically
               .map(([num, count]) => (
-                <View key={num} style={styles.countItem}>
-                  <Text style={styles.countNumber}>{num}:</Text>
+                <View key={num} style={[styles.countItem, {minWidth: 70}]}>
+                  <Text style={styles.emojiLabel}>{numberKey[Number(num)]}</Text>
                   <Text style={styles.countValue}>{count}</Text>
                 </View>
             ))}
@@ -134,30 +137,20 @@ export default function Index() {
           <Text style={styles.sectionTitle}>Legend</Text>
           <View style={styles.countsContent}>
             {Object.entries(numberKey).map(([num, desc]) => (
-              <View key={num} style={[styles.countItem, styles.legendItem]}>
-                <Text style={styles.countNumber}>{num}:</Text>
-                <Text style={styles.legendDesc}>{desc}</Text>
-              </View>
+              <Pressable key={num} onPress={() => addNumberToHistory(num)}>
+                <View style={[styles.countItem, styles.legendItem, {minWidth: 70}]}>
+                  <Text style={styles.countNumber}>{num}:</Text>
+                  <Text style={styles.legendDesc}>{desc}</Text>
+                </View>
+              </Pressable>
             ))}
           </View>
         </View>
-        <Text style={styles.title}>Number History</Text>
-        <TextInput
-          ref={inputRef}
-          style={styles.input}
-          value={number}
-          onChangeText={setNumber}
-          placeholder="Type a number and press enter"
-          keyboardType="numeric"
-          returnKeyType="done"
-          blurOnSubmit={false}
-          onSubmitEditing={handleNumberSubmit}
-        />
         <Text style={styles.historyTitle}>History</Text>
         <FlatList
           data={chunkedHistory}
           renderItem={renderHistoryRow}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(_, index) => index.toString()}
           style={styles.list}
         />
       </View>
@@ -206,6 +199,10 @@ const styles = StyleSheet.create({
   legendDesc: {
     fontSize: 64,
   },
+  emojiLabel: {
+    fontSize: 20,
+    marginRight: 5,
+  },
   countNumber: { fontWeight: "bold", marginRight: 5 },
   countValue: { color: "#333" },
   input: { height: 40, borderColor: "gray", borderWidth: 1, marginBottom: 20, paddingHorizontal: 10, backgroundColor: 'white', borderRadius: 5 },
@@ -218,10 +215,10 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
   },
   historyBankItem: {
-    width: '12.5%', // 100% / 8 items = 12.5%
+    width: '16.66%', // 100% / 6 items
   },
   historyBankText: {
-    fontSize: 16,
+    fontSize: 48,
     textAlign: 'center',
   },
 });
