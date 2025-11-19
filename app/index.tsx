@@ -271,25 +271,26 @@ export default function Index() {
       <View style={styles.content}>
         <View style={[styles.sectionContainer, { borderBottomColor: currentColors.sectionBorder, paddingBottom: 0 }]}>
           <Text style={[styles.sectionTitle, { color: currentColors.text }]}>Super Mega Ultra Tracker</Text>
-          <View style={[styles.countsContent, { marginBottom: 15, paddingBottom: 15, borderBottomWidth: 1, borderBottomColor: currentColors.sectionBorder }]}>
-            {[2, 4, 5, 8, 9].map(num => {
+          <View style={[styles.countsContent, { marginBottom: 15, paddingBottom: 15, borderBottomWidth: 1, borderBottomColor: currentColors.sectionBorder, alignItems: 'flex-end' }]}>
+            {displayOrder.map(num => {
               const multipliers: Record<number, number> = {
                 2: 2, // Cherry
                 4: 4, // Grape
                 5: 5, // Lemon
                 8: 8, // Melon
                 9: 20, // Gold
+                // 0 is also Gold, but not in the original array. Let's assume it's not needed here based on the code.
               };
               const multiplier = multipliers[num];
-              if (multiplier === undefined) return null;
-
-              const actual = counts[num] || 0;
-              const result = (actual * multiplier).toFixed(0);
+              
+              // If a multiplier exists, calculate and show the result. Otherwise, render an empty placeholder to maintain alignment.
+              const result = multiplier !== undefined
+                ? ((counts[num] || 0) * multiplier).toFixed(0)
+                : null;
 
               return (
-                <View key={num} style={styles.multiplierItem}>
-                  <Text style={styles.multiplierEmoji}>{numberKey[num]}</Text>
-                  <Text style={[styles.multiplierValue, { color: currentColors.text }]}>{result}</Text>
+                <View key={num} style={styles.multiplierItem} >
+                  {result !== null && <Text style={[styles.multiplierValue, { color: currentColors.text }]}>{result}</Text>}
                 </View>
               );
             })}
@@ -372,16 +373,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   multiplierItem: {
+    width: 80, // Match statItemContainer width
+    height: 30, // Give it some height
+    justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 10,
-  },
-  multiplierEmoji: {
-    fontSize: 24,
+    margin: 8, // Match statItemContainer margin
   },
   multiplierValue: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 4,
   },
   statItemContainer: {
     position: 'relative',
