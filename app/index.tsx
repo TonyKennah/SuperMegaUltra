@@ -269,8 +269,31 @@ export default function Index() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentColors.background }]}>
       <View style={styles.content}>
-        <View style={[styles.sectionContainer, { borderBottomColor: currentColors.sectionBorder }]}>
+        <View style={[styles.sectionContainer, { borderBottomColor: currentColors.sectionBorder, paddingBottom: 0 }]}>
           <Text style={[styles.sectionTitle, { color: currentColors.text }]}>Super Mega Ultra Tracker</Text>
+          <View style={[styles.countsContent, { marginBottom: 15, paddingBottom: 15, borderBottomWidth: 1, borderBottomColor: currentColors.sectionBorder }]}>
+            {[2, 4, 5, 8, 9].map(num => {
+              const multipliers: Record<number, number> = {
+                2: 2, // Cherry
+                4: 4, // Grape
+                5: 5, // Lemon
+                8: 8, // Melon
+                9: 20, // Gold
+              };
+              const multiplier = multipliers[num];
+              if (multiplier === undefined) return null;
+
+              const actual = counts[num] || 0;
+              const result = (actual * multiplier).toFixed(0);
+
+              return (
+                <View key={num} style={styles.multiplierItem}>
+                  <Text style={styles.multiplierEmoji}>{numberKey[num]}</Text>
+                  <Text style={[styles.multiplierValue, { color: currentColors.text }]}>{result}</Text>
+                </View>
+              );
+            })}
+          </View>
           <View style={styles.countsContent}>
             {displayOrder.map(num => {
               const actual = counts[num] || 0;
@@ -347,6 +370,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
+  },
+  multiplierItem: {
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  multiplierEmoji: {
+    fontSize: 24,
+  },
+  multiplierValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 4,
   },
   statItemContainer: {
     position: 'relative',
