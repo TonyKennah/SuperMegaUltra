@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useRef, useState } from "react";
 import {
   FlatList,
   ListRenderItem,
@@ -16,8 +17,54 @@ export default function Index() {
   const [history, setHistory] = useState<string[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [sinceLastHit, setSinceLastHit] = useState<Record<string, number>>({});
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const inputRef = useRef<TextInput>(null);
+  const isInitialMount = useRef(true);
+
+  // Load state from storage on app start
+  useEffect(() => {
+    const loadState = async () => {
+      try {
+        const savedHistory = await AsyncStorage.getItem('history');
+        const savedCounts = await AsyncStorage.getItem('counts');
+        const savedSinceLastHit = await AsyncStorage.getItem('sinceLastHit');
+        const savedTheme = await AsyncStorage.getItem('theme');
+
+        if (savedHistory) setHistory(JSON.parse(savedHistory));
+        if (savedCounts) setCounts(JSON.parse(savedCounts));
+        if (savedSinceLastHit) setSinceLastHit(JSON.parse(savedSinceLastHit));
+        if (savedTheme) setTheme(savedTheme as 'light' | 'dark');
+      } catch (e) {
+        console.error("Failed to load state from storage", e);
+      }
+    };
+    loadState();
+  }, []);
+
+  // Save history-related state whenever history changes
+  useEffect(() => {
+    const saveHistoryState = async () => {
+      try {
+        await AsyncStorage.setItem('history', JSON.stringify(history));
+        await AsyncStorage.setItem('counts', JSON.stringify(counts));
+        await AsyncStorage.setItem('sinceLastHit', JSON.stringify(sinceLastHit));
+      } catch (e) {
+        console.error("Failed to save history state", e);
+      }
+    };
+    saveHistoryState();
+  }, [history, counts, sinceLastHit]); // This effect depends on the history state
+
+  // Save theme when it changes
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      // Only save theme on subsequent renders, not on initial mount
+      AsyncStorage.setItem('theme', theme);
+    }
+  }, [theme]);
+
 
   const addNumberToHistory = (numToAdd: string) => {
     const newNumber = numToAdd.trim();
