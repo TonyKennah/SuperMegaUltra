@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Updates from 'expo-updates';
 import { useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -102,7 +103,12 @@ export default function Index() {
         await AsyncStorage.removeItem('history');
         await AsyncStorage.removeItem('counts');
         await AsyncStorage.removeItem('sinceLastHit');
-        Alert.alert("Success", "Saved data has been cleared. Please reload the app to start fresh.");
+
+        if (Platform.OS === 'web') {
+          window.location.reload();
+        } else {
+          await Updates.reloadAsync();
+        }
       } catch (e) {
         console.error("Failed to clear storage", e);
       }
