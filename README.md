@@ -14,7 +14,7 @@ A tracker application to monitor the frequency of numbers, compare them against 
 
 ## User Guide
 
-This guide explains how to use the different features of the SuperMegaUltra tracker.
+This guide explains how to use the different features of the SuperMegaUltra tracker - available on github pages [here](https://tonykennah.github.io/SuperMegaUltra/) 
 
 ### Statistics View
 
