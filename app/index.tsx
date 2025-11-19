@@ -16,8 +16,10 @@ import {
 } from "react-native";
 
 export default function Index() {
+  type HistoryItem = { num: string; highlight: 'none' | 'blue' | 'red' };
+
   const [number, setNumber] = useState("");
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [sinceLastHit, setSinceLastHit] = useState<Record<string, number>>({});
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
@@ -72,17 +74,28 @@ export default function Index() {
   const addNumberToHistory = (numToAdd: string) => {
     const newNumber = numToAdd.trim();
     if (newNumber && numberKey.hasOwnProperty(newNumber)) {
-      const newHistory = [newNumber, ...history];
+      // Determine highlight status for the NEW item based on previous entries
+      let highlight: HistoryItem['highlight'] = 'none';
+      if (history.length > 0 && history[0].num === '0') {
+        if (history.length > 1 && history[1].num === '0') {
+          highlight = 'red'; // Two 0s in a row
+        } else {
+          highlight = 'blue'; // One 0
+        }
+      }
+
+      const newHistoryItem: HistoryItem = { num: newNumber, highlight };
+      const newHistory = [newHistoryItem, ...history];
       setHistory(newHistory);
+
       setCounts((prevCounts) => ({
         ...prevCounts,
         [newNumber]: (prevCounts[newNumber] || 0) + 1,
       }));
 
-      // Recalculate sinceLastHit from the new history
       const newSinceLastHit: Record<string, number> = {};
       displayOrder.forEach(num => {
-        const lastIndex = newHistory.findIndex(h => h === String(num));
+        const lastIndex = newHistory.findIndex(h => h.num === String(num));
         // If found, the count is its index. If not, it's the total length.
         newSinceLastHit[num] = lastIndex === -1 ? newHistory.length : lastIndex;
       });
@@ -134,17 +147,29 @@ export default function Index() {
     }
   };
   const handleRemoveNumber = (indexToRemove: number) => {
-    const numberToRemove = history[indexToRemove];
+    // Find the correct item to remove from the display history
+    const itemToRemove = displayHistory[indexToRemove];
+    if (!itemToRemove) return;
 
-    // Remove from history
-    const newHistory = history.filter((_, index) => index !== indexToRemove);
+    // Find the first occurrence of this specific item instance in the main history and remove it
+    const realIndex = history.findIndex(h => h === itemToRemove);
+    if (realIndex === -1) return;
+
+    const newHistory = history.filter((_, index) => index !== realIndex);
     setHistory(newHistory);
 
     // Decrement count
     setCounts(prevCounts => {
+      const numberToRemove = itemToRemove.num;
       const newCounts = { ...prevCounts };
-      newCounts[numberToRemove]--;
-      if (newCounts[numberToRemove] === 0) {
+      if (newCounts[numberToRemove]) {
+        newCounts[numberToRemove]--;
+        if (newCounts[numberToRemove] === 0) {
+          delete newCounts[numberToRemove];
+        }
+      }
+      // If the count is somehow already 0 or doesn't exist, we don't need to do anything.
+      if (!newCounts[numberToRemove]) {
         delete newCounts[numberToRemove];
       }
       return newCounts;
@@ -153,7 +178,7 @@ export default function Index() {
     // Recalculate sinceLastHit after removal
     const newSinceLastHit: Record<string, number> = {};
     displayOrder.forEach(num => {
-      const lastIndex = newHistory.findIndex(h => h === String(num));
+      const lastIndex = newHistory.findIndex(h => h.num === String(num));
       newSinceLastHit[num] = lastIndex === -1 ? newHistory.length : lastIndex;
     });
     setSinceLastHit(newSinceLastHit);
@@ -168,18 +193,26 @@ export default function Index() {
   };
 
   // Filter out '0' for display purposes only, keeping it in the main history state for calculations
-  const displayHistory = history.filter(h => h !== '0');
+  const displayHistory = history.filter(h => h.num !== '0');
   const chunkedHistory = chunkArray(displayHistory, 7);
 
-  const renderHistoryRow: ListRenderItem<string[]> = ({ item, index: rowIndex }) => (
-    <View style={styles.historyRow}>
-      {item.map((num, index) => (
-        <Pressable key={index} style={styles.historyBankItem} onPress={() => handleRemoveNumber(rowIndex * 7 + index)}>
-          <Text style={styles.historyBankText}>{numberKey[Number(num)]}</Text>
-        </Pressable>
-      ))}
-    </View>
-  );
+  const renderHistoryRow: ListRenderItem<string[]> = ({ item, index: rowIndex }) => {
+    return (
+      <View style={styles.historyRow}>
+        {item.map((historyItem, index) => {
+          const flatIndex = (rowIndex * 7) + index;
+          const highlightStyle = historyItem.highlight === 'blue' ? styles.highlightedBlue :
+                                 historyItem.highlight === 'red' ? styles.highlightedRed : null;
+
+          return (
+            <Pressable key={index} style={[styles.historyBankItem, highlightStyle]} onPress={() => handleRemoveNumber(flatIndex)}>
+              <Text style={styles.historyBankText}>{numberKey[Number(historyItem.num)]}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    );
+  };
 
   const totalEntries = history.length;
   const displayOrder = [2, 4, 5, 8, 9, 0, 7, 1];
@@ -389,6 +422,18 @@ const styles = StyleSheet.create({
   },
   historyBankItem: {
     width: '3.28%', // 100% / 7 items
+  },
+  highlightedBlue: {
+    backgroundColor: 'rgba(0, 122, 255, 0.2)',
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: '#007aff',
+  },
+  highlightedRed: {
+    backgroundColor: 'rgba(255, 59, 48, 0.2)',
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: '#ff3b30',
   },
   historyBankText: {
     fontSize: 24,
