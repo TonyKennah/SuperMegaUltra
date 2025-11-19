@@ -1,8 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   FlatList,
   ListRenderItem,
+  Platform,
   Pressable,
   SafeAreaView,
   StyleSheet,
@@ -92,6 +94,39 @@ export default function Index() {
     setNumber(""); // Clear the input field
   };
 
+  const handleClearState = () => {
+    const clearMessage = "This will clear all saved history and settings from storage. The app will use default values on the next reload. Are you sure?";
+    
+    const clearAction = async () => {
+      try {
+        await AsyncStorage.removeItem('history');
+        await AsyncStorage.removeItem('counts');
+        await AsyncStorage.removeItem('sinceLastHit');
+        Alert.alert("Success", "Saved data has been cleared. Please reload the app to start fresh.");
+      } catch (e) {
+        console.error("Failed to clear storage", e);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Clear Saved Data\n\n${clearMessage}`)) {
+        clearAction();
+      }
+    } else {
+      Alert.alert(
+        "Clear Saved Data",
+        clearMessage,
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Clear Storage",
+            style: "destructive",
+            onPress: clearAction,
+          },
+        ]
+      );
+    }
+  };
   const handleRemoveNumber = (indexToRemove: number) => {
     const numberToRemove = history[indexToRemove];
 
@@ -238,6 +273,9 @@ export default function Index() {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text style={{ color: currentColors.text }}>Dark Mode</Text>
                 <Switch value={theme === 'dark'} onValueChange={(isOn) => setTheme(isOn ? 'dark' : 'light')} />
+                <Pressable onPress={handleClearState} style={styles.clearButton}>
+                    <Text style={styles.clearButtonText}>Clear</Text>
+                </Pressable>
             </View>
         </View>
         <FlatList
@@ -327,6 +365,16 @@ const styles = StyleSheet.create({
   countNumber: { fontWeight: "bold", marginRight: 5 },
   countValue: { color: "#333" },
   historyTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  clearButton: {
+    backgroundColor: '#c82333',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  clearButtonText: {
+    color: 'white',
+  },
   list: { flex: 1 },
   historyRow: {
     flexDirection: 'row',
