@@ -24,6 +24,8 @@ At the top of the screen, you will see a "Statistics" section. For each item (re
 *   **Top-Right**: The **Expected Count**, which is the statistically expected number of hits for the current total number of entries.
 *   **Bottom-Left**: The **Difference** between the actual and expected counts. Green indicates you are above the expectation, and red indicates you are below.
 *   **Bottom-Right**: The number of entries **Since Last Hit**.
+*   
+<img width="1876" height="813" alt="image" src="https://github.com/user-attachments/assets/16e09b46-a5c8-4c31-b158-135d150532f8" />
 
 ### Adding Numbers
 
