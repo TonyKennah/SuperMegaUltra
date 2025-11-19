@@ -37,3 +37,7 @@ Below the main sections, you will find the **History** log and settings controls
     *   **To remove an item**, simply click on its emoji in the history list.
 *   **Dark Mode**: Use the toggle switch to turn dark mode on or off. Your preference is saved automatically.
 *   **Clear Button**: Click this button to clear all saved data from the application's storage. A confirmation dialog will appear to prevent accidental data loss. After clearing, you will need to reload the app to start with a fresh state.
+
+# Conclusion
+
+The game is setup to deliver less as payout than placed for example in 200 spins there will be less than 10 gold at 20 points, less than 100 cherry at 2 points, EVERY SYMBOL PAYS BACK LESS THAN STAKED.  
