@@ -2,6 +2,9 @@
 
 A tracker application to monitor the frequency of numbers, compare them against statistical expectations, and view a history of entries.
 
+<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/7d6c2c34-5a3c-46ce-9cfe-fd5c0ef96003" />
+
+
 ## Features
 
 *   **Statistical Analysis**: View actual counts, expected counts based on weighted probabilities, and the difference between them.
