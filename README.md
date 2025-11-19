@@ -45,4 +45,4 @@ Below the main sections, you will find the **History** log and settings controls
 
 # Conclusion
 
-The game is setup to deliver less as payout than placed for example in 200 spins there will be less than 10 gold at 20 points, less than 100 cherry at 2 points, EVERY SYMBOL PAYS BACK LESS THAN STAKED.  
+The game is setup to deliver less as payout than placed for example in 200 spins there will be less than 10 gold at 20 points, less than 100 cherry at 2 points, EVERY SYMBOL PAYS BACK LESS THAN STAKED.  An evening of development as I knew it cannot be a random spin of a wheel - and it isn't!
