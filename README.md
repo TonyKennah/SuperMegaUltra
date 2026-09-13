@@ -2,6 +2,9 @@
 
 A tracker application to monitor the frequency of numbers, compare them against statistical expectations, and view a history of entries.
 
+<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/7d6c2c34-5a3c-46ce-9cfe-fd5c0ef96003" />
+
+
 ## Features
 
 *   **Statistical Analysis**: View actual counts, expected counts based on weighted probabilities, and the difference between them.
@@ -14,7 +17,7 @@ A tracker application to monitor the frequency of numbers, compare them against 
 
 ## User Guide
 
-This guide explains how to use the different features of the SuperMegaUltra tracker.
+This guide explains how to use the different features of the SuperMegaUltra tracker - available on github pages [here](https://tonykennah.github.io/SuperMegaUltra/) 
 
 ### Statistics View
 
@@ -24,6 +27,8 @@ At the top of the screen, you will see a "Statistics" section. For each item (re
 *   **Top-Right**: The **Expected Count**, which is the statistically expected number of hits for the current total number of entries.
 *   **Bottom-Left**: The **Difference** between the actual and expected counts. Green indicates you are above the expectation, and red indicates you are below.
 *   **Bottom-Right**: The number of entries **Since Last Hit**.
+*   
+<img width="1876" height="813" alt="image" src="https://github.com/user-attachments/assets/16e09b46-a5c8-4c31-b158-135d150532f8" />
 
 ### Adding Numbers
 
@@ -37,3 +42,7 @@ Below the main sections, you will find the **History** log and settings controls
     *   **To remove an item**, simply click on its emoji in the history list.
 *   **Dark Mode**: Use the toggle switch to turn dark mode on or off. Your preference is saved automatically.
 *   **Clear Button**: Click this button to clear all saved data from the application's storage. A confirmation dialog will appear to prevent accidental data loss. After clearing, you will need to reload the app to start with a fresh state.
+
+# Conclusion
+
+The game is setup to deliver less as payout than placed for example in 200 spins there will be less than 10 gold at 20 points, less than 100 cherry at 2 points, EVERY SYMBOL PAYS BACK LESS THAN STAKED.  An evening of development as I knew it cannot be a random spin of a wheel - and it isn't!
