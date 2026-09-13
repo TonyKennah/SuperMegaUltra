@@ -229,7 +229,7 @@ export default function Index() {
   };
 
   const numberKey: Record<number, string> = {
-    0: "⬆️",
+    0: "🟰",
     1: "🎰",
     2: "🍒",
     4: "🍇",
