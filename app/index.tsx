@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Updates from 'expo-updates';
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import {
   Alert,
   FlatList,
@@ -19,9 +19,7 @@ export default function Index() {
   type HistoryItem = { num: string; highlight: 'none' | 'blue' | 'red' };
 
   const [number, setNumber] = useState("");
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [counts, setCounts] = useState<Record<string, number>>({});
-  const [sinceLastHit, setSinceLastHit] = useState<Record<string, number>>({});
+  const [history, setHistory] = useState<HistoryItem[]>([]); // Single source of truth
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const inputRef = useRef<TextInput>(null);
   const isInitialMount = useRef(true);
@@ -31,13 +29,9 @@ export default function Index() {
     const loadState = async () => {
       try {
         const savedHistory = await AsyncStorage.getItem('history');
-        const savedCounts = await AsyncStorage.getItem('counts');
-        const savedSinceLastHit = await AsyncStorage.getItem('sinceLastHit');
         const savedTheme = await AsyncStorage.getItem('theme');
 
         if (savedHistory) setHistory(JSON.parse(savedHistory));
-        if (savedCounts) setCounts(JSON.parse(savedCounts));
-        if (savedSinceLastHit) setSinceLastHit(JSON.parse(savedSinceLastHit));
         if (savedTheme) setTheme(savedTheme as 'light' | 'dark');
       } catch (e) {
         console.error("Failed to load state from storage", e);
@@ -51,14 +45,13 @@ export default function Index() {
     const saveHistoryState = async () => {
       try {
         await AsyncStorage.setItem('history', JSON.stringify(history));
-        await AsyncStorage.setItem('counts', JSON.stringify(counts));
-        await AsyncStorage.setItem('sinceLastHit', JSON.stringify(sinceLastHit));
+        // counts and sinceLastHit are derived; only persist history
       } catch (e) {
         console.error("Failed to save history state", e);
       }
     };
     saveHistoryState();
-  }, [history, counts, sinceLastHit]); // This effect depends on the history state
+  }, [history]); // Save only history; counts & sinceLastHit are derived
 
   // Save theme when it changes
   useEffect(() => {
@@ -68,7 +61,7 @@ export default function Index() {
       // Only save theme on subsequent renders, not on initial mount
       AsyncStorage.setItem('theme', theme);
     }
-  }, [theme]);
+  }, [theme]); // unchanged
 
 
   const addNumberToHistory = (numToAdd: string) => {
@@ -88,18 +81,9 @@ export default function Index() {
       const newHistory = [newHistoryItem, ...history];
       setHistory(newHistory);
 
-      setCounts((prevCounts) => ({
-        ...prevCounts,
-        [newNumber]: (prevCounts[newNumber] || 0) + 1,
-      }));
+      // counts are derived via useMemo; no explicit state update needed
 
-      const newSinceLastHit: Record<string, number> = {};
-      displayOrder.forEach(num => {
-        const lastIndex = newHistory.findIndex(h => h.num === String(num));
-        // If found, the count is its index. If not, it's the total length.
-        newSinceLastHit[num] = lastIndex === -1 ? newHistory.length : lastIndex;
-      });
-      setSinceLastHit(newSinceLastHit);
+      // sinceLastHit derived from history; no direct state update needed
     }
   };
 
@@ -110,12 +94,11 @@ export default function Index() {
 
   const handleClearState = () => {
     const clearMessage = "This will clear all saved history and settings from storage. The app will use default values on the next reload. Are you sure?";
-    
+
     const clearAction = async () => {
       try {
         await AsyncStorage.removeItem('history');
-        await AsyncStorage.removeItem('counts');
-        await AsyncStorage.removeItem('sinceLastHit');
+        // No need to remove derived data; only clear history
 
         if (Platform.OS === 'web') {
           window.location.reload();
@@ -202,7 +185,7 @@ export default function Index() {
         {item.map((historyItem, index) => {
           const flatIndex = (rowIndex * 7) + index;
           const highlightStyle = historyItem.highlight === 'blue' ? styles.highlightedBlue :
-                                 historyItem.highlight === 'red' ? styles.highlightedRed : null;
+            historyItem.highlight === 'red' ? styles.highlightedRed : null;
 
           return (
             <Pressable key={index} style={[styles.historyBankItem, highlightStyle]} onPress={() => handleRemoveNumber(flatIndex)}>
@@ -217,6 +200,25 @@ export default function Index() {
   const totalEntries = history.length;
   const displayOrder = [2, 4, 5, 8, 9, 0, 7, 1];
 
+  // Derive counts from history
+  const counts = useMemo(() => {
+    const map: Record<string, number> = {};
+    history.forEach(item => {
+      map[item.num] = (map[item.num] || 0) + 1;
+    });
+    return map;
+  }, [history]);
+
+  // Derive sinceLastHit from history
+  const sinceLastHit = useMemo(() => {
+    const map: Record<string, number> = {};
+    displayOrder.forEach(num => {
+      const lastIdx = history.findIndex(h => h.num === String(num));
+      map[num] = lastIdx === -1 ? history.length : lastIdx;
+    });
+    return map;
+  }, [history, displayOrder]);
+
   const expectedPercentages: Record<number, number> = {
     0: 0.0926,
     1: 0.037,
@@ -229,7 +231,7 @@ export default function Index() {
   };
 
   const numberKey: Record<number, string> = {
-    0: "🟰",
+    0: "⬆️",
     1: "🎰",
     2: "🍒",
     4: "🍇",
@@ -282,7 +284,7 @@ export default function Index() {
                 // 0 is also Gold, but not in the original array. Let's assume it's not needed here based on the code.
               };
               const multiplier = multipliers[num];
-              
+
               // If a multiplier exists, calculate and show the result. Otherwise, render an empty placeholder to maintain alignment.
               const result = multiplier !== undefined
                 ? ((counts[num] || 0) * multiplier).toFixed(0)
@@ -323,7 +325,7 @@ export default function Index() {
             {displayOrder.map((num) => {
               return (
                 <Pressable key={num} onPress={() => addNumberToHistory(String(num))}>
-                  <View style={[styles.legendItem, {minWidth: 70, backgroundColor: currentColors.legendItemBg}]}>
+                  <View style={[styles.legendItem, { minWidth: 70, backgroundColor: currentColors.legendItemBg }]}>
                     <Text style={styles.legendDesc}>{numberKey[num]}</Text>
                   </View>
                 </Pressable>
@@ -332,14 +334,14 @@ export default function Index() {
           </View>
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <Text style={[styles.historyTitle, { color: currentColors.text, marginBottom: 0 }]}>History ({displayHistory.length})</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ color: currentColors.text }}>Dark Mode</Text>
-                <Switch value={theme === 'dark'} onValueChange={(isOn) => setTheme(isOn ? 'dark' : 'light')} />
-                <Pressable onPress={handleClearState} style={styles.clearButton}>
-                    <Text style={styles.clearButtonText}>Clear</Text>
-                </Pressable>
-            </View>
+          <Text style={[styles.historyTitle, { color: currentColors.text, marginBottom: 0 }]}>History ({displayHistory.length})</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text style={{ color: currentColors.text }}>Dark Mode</Text>
+            <Switch value={theme === 'dark'} onValueChange={(isOn) => setTheme(isOn ? 'dark' : 'light')} />
+            <Pressable onPress={handleClearState} style={styles.clearButton}>
+              <Text style={styles.clearButtonText}>Clear</Text>
+            </Pressable>
+          </View>
         </View>
         <FlatList
           data={chunkedHistory}
